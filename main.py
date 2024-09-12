@@ -6,6 +6,11 @@ import time
 load_dotenv()
 from cloudflare import Cloudflare
 
+def get_ip_addr():
+    response = requests.get("https://cloudflare.com/cdn-cgi/trace")
+    ip_match = re.search(r"ip=([^\n\r]+)", response.text)
+    return ip_match.group(1)
+
 client = Cloudflare(
     # This is the default and can be omitted
     # api_email=os.environ.get("CLOUDFLARE_EMAIL"),
@@ -19,12 +24,8 @@ DDNS_RECORD_NAME = os.environ.get("DDNS_RECORD_NAME")
 DDNS_REFRESH_INTERVAL = int(os.environ.get("DDNS_REFRESH_INTERVAL")) if os.environ.get("DDNS_REFRESH_INTERVAL") else 5
 
 zone = client.zones.get(zone_id=ZONE_ID)
-
 RECORD_NAME=f"{DDNS_RECORD_NAME}.{zone.name}".lower()
-
-response = requests.get("https://cloudflare.com/cdn-cgi/trace")
-ip_match = re.search(r"ip=([^\n\r]+)", response.text)
-IP_ADDR = ip_match.group(1)
+IP_ADDR = os.environ.get("IP_ADDR") if os.environ.get("IP_ADDR") else get_ip_addr()
 
 dns_records = client.dns.records.list(zone_id=ZONE_ID)
 dns_record = None
