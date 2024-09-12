@@ -1,0 +1,7 @@
+services:
+  web:
+    build:
+      context: ./
+    command: python main.py
+    env_file:
+      - .env
