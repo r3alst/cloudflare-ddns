@@ -1,0 +1,21 @@
+# Python:
+*.pyc
+*.pyo
+venv/
+venv-3.7/
+**/__pycache__/
+
+# PyCharm:
+.idea/
+.vscode/
+
+# Misc
+.bashrc
+.DS_Store
+**/.DS_Store
+*.swp
+.env*
+local-*.sh
+local-*.zip
+local-*.json
+*.dump
