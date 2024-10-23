@@ -25,6 +25,7 @@ DDNS_REFRESH_INTERVAL = int(os.environ.get("DDNS_REFRESH_INTERVAL")) if os.envir
 
 zone = client.zones.get(zone_id=ZONE_ID)
 RECORD_NAME=f"{DDNS_RECORD_NAME}.{zone.name}".lower()
+last_ip = None
 IP_ADDR = os.environ.get("IP_ADDR") if os.environ.get("IP_ADDR") else get_ip_addr()
 
 dns_records = client.dns.records.list(zone_id=ZONE_ID)
@@ -35,22 +36,27 @@ for record in dns_records:
         dns_record = record
 
 while True:
-    if dns_record is None:
-        client.dns.records.create(
-            zone_id=ZONE_ID,
-            name=RECORD_NAME,
-            type="A",
-            content=IP_ADDR,
-            proxied=False
-        )
-    else:
-        client.dns.records.edit(
-            zone_id=ZONE_ID,
-            dns_record_id=dns_record.id,
-            name=RECORD_NAME,
-            type="A",
-            content=IP_ADDR,
-            proxied=False
-        )
+    if last_ip != IP_ADDR:
+        if dns_record is None:
+            client.dns.records.create(
+                zone_id=ZONE_ID,
+                name=RECORD_NAME,
+                type="A",
+                content=IP_ADDR,
+                proxied=False
+            )
+        else:
+            client.dns.records.edit(
+                zone_id=ZONE_ID,
+                dns_record_id=dns_record.id,
+                name=RECORD_NAME,
+                type="A",
+                content=IP_ADDR,
+                proxied=False
+            )
+
     print(f"{RECORD_NAME} -> {IP_ADDR}")
+
+    last_ip = IP_ADDR
     time.sleep(DDNS_REFRESH_INTERVAL)
+    IP_ADDR = os.environ.get("IP_ADDR") if os.environ.get("IP_ADDR") else get_ip_addr()
